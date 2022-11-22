@@ -27,9 +27,6 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Build app
-        run: yarn build
-
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
@@ -42,3 +39,4 @@ jobs:
           context: ./api
           push: true
           tags: ynov/tp3-${{ github.sha }}
+          run: yarn build
