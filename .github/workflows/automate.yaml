@@ -1,5 +1,6 @@
 name: Automatisation de l'intégration continue
 on: [push]
+
 jobs:
   build-and-test:
     name: Run unit tests
@@ -9,9 +10,15 @@ jobs:
         working-directory: ./api
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v3
+        with:
+          cache: 'yarn'
+
       - name: Install dependencies
         run: yarn install
+
       - name: Run Unit Tests
         run: yarn test
 
@@ -33,10 +40,13 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
-      - uses: actions/setup-node@v3
+      - name: Setup NodeJS
+        uses: actions/setup-node@v3
+        with:
+          cache: 'yarn'
 
       - name: Install dependencies
-        run: yarn install
+        run: yarn install --immutable --immutable-cache
 
       - name: Run integration Tests
         run: yarn test:e2e
@@ -54,8 +64,13 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v3
 
+      - name: Setup NodeJS
+        uses: actions/setup-node@v3
+        with:
+          cache: 'yarn'
+
       - name: Install dependencies
-        run: yarn install
+        run: yarn install --immutable --immutable-cache
 
       - name: Build app
         run: yarn build
