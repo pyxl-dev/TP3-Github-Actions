@@ -36,7 +36,7 @@ jobs:
       - name: Run integration Tests
         run: yarn test:e2e
         env:
-          MONGODB_URI: mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@mongo:27017
+          MONGODB_URI: mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@localhost:27017
 
   push-to-docker:
     name: Push on Docker Hub
