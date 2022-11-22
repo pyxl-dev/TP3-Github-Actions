@@ -24,6 +24,8 @@ jobs:
     services:
       mongo:
         image: mongo
+        ports:
+          - 27017:27017
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
