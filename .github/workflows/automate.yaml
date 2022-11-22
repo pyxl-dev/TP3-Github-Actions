@@ -22,7 +22,7 @@ jobs:
       run:
         working-directory: ./api
     services:
-      mongodb:
+      mongo:
         image: mongo
     steps:
       - name: Check out the repo
@@ -33,10 +33,10 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Run Unit Tests
+      - name: Run integration Tests
         run: yarn test:e2e
         env:
-          MONGODB_URI: mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@mongodb:27017
+          MONGODB_URI: mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@mongo:27017
 
   push-to-docker:
     name: Push on Docker Hub
