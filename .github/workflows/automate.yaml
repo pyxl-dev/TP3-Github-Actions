@@ -48,7 +48,7 @@ jobs:
           cache-dependency-path: '**/yarn.lock'
 
       - name: Install dependencies
-        run: yarn install --immutable --immutable-cache
+        run: yarn install
 
       - name: Run integration Tests
         run: yarn test:e2e
@@ -73,7 +73,7 @@ jobs:
           cache-dependency-path: '**/yarn.lock'
 
       - name: Install dependencies
-        run: yarn install --immutable --immutable-cache
+        run: yarn install
 
       - name: Build app
         run: yarn build
