@@ -24,8 +24,6 @@ jobs:
     services:
       mongodb:
         image: mongo
-        env:
-          MONGODB_URI: mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@mongo:27017
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
@@ -37,6 +35,8 @@ jobs:
 
       - name: Run Unit Tests
         run: yarn test:e2e
+        env:
+          MONGODB_URI: mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@mongodb:27017
 
   push-to-docker:
     name: Push on Docker Hub
