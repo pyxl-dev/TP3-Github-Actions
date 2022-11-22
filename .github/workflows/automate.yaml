@@ -1,0 +1,16 @@
+name: Automatisation de l'intégration continue
+on: [push]
+jobs:
+  build-and-test:
+    name: Run unit tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./api
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+      - name: Install dependencies
+        run: yarn install
+      - name: Run Unit Tests
+        run: yarn test
