@@ -14,3 +14,21 @@ jobs:
         run: yarn install
       - name: Run Unit Tests
         run: yarn test
+  push-to-docker:
+    name: Push on Docker Hub
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action
+        with:
+          username: ${{ secrets.TP3_DOCKERHUB_USERNAME }}
+          password: ${{ secrets.TP3_DOCKERHUB_SECRET }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          tags: ynov/tp3-${{ github.sha }}
