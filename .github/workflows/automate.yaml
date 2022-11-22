@@ -44,4 +44,4 @@ jobs:
         with:
           context: ./api
           push: true
-          tags: ynov/tp3-${{ github.sha }}
+          tags: yoanc/tp3-github-actions:${{ github.sha }}
