@@ -15,7 +15,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           cache: 'yarn'
-          cache-dependency-path: './api/yarn.lock'
+          cache-dependency-path: '**/yarn.lock'
 
       - name: Install dependencies
         run: yarn install
@@ -45,7 +45,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           cache: 'yarn'
-          cache-dependency-path: './api/yarn.lock'
+          cache-dependency-path: '**/yarn.lock'
 
       - name: Install dependencies
         run: yarn install --immutable --immutable-cache
@@ -70,7 +70,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           cache: 'yarn'
-          cache-dependency-path: './api/yarn.lock'
+          cache-dependency-path: '**/yarn.lock'
 
       - name: Install dependencies
         run: yarn install --immutable --immutable-cache
