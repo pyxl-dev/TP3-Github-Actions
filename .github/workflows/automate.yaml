@@ -17,6 +17,9 @@ jobs:
   push-to-docker:
     name: Push on Docker Hub
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./api
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
