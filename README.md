@@ -6,11 +6,9 @@
 ![Lyazid Bahajjoub](https://img.shields.io/badge/%F0%9F%94%A5-Lyazid%20Bahajjoub-%2323b2a4)
 ![Jamil Abdel Hamid](https://img.shields.io/badge/%F0%9F%94%A5-Jamil%20Abdel%20Hamid-%2323b2a4)
 
-![GitHub last commit](https://img.shields.io/github/last-commit/Nizrod/TP3-Github-Actions)
-
 ![Automatisation](https://github.com/Nizrod/TP3-Github-Actions/actions/workflows/automate.yaml/badge.svg)
 
-> Description du projet
+> TP pour présenter une CI/CD avec GitHub Actions
 
 </div>
 
@@ -18,13 +16,18 @@
 
 ## Sommaire
 
-- [Automatisation de l'intégration continue de l'API](#automatisation-de-lintégration-continue-de-lapi)
-  - [Les étapes d'intégration continue de l'API](#les-étapes-dintégration-continue-de-lapi)
-  - [1) Automatisation des tests unitaires](#1-automatisation-des-tests-unitaires)
-  - [2) Automatisation des tests d'intégration](#2-automatisation-des-tests-dintégration)
-  - [3) Automatisation des tests d'intégration](#3-automatisation-des-tests-dintégration)
-- [4) Mise en cache des dépendances](#4--mise-en-cache-des-d-pendances)
-- [Références](#références)
+- [CI/CD avec GitHub Actions](#cicd-avec-github-actions)
+  - [Sommaire](#sommaire)
+  - [Automatisation de l'intégration continue de l'API](#automatisation-de-lintégration-continue-de-lapi)
+    - [Les étapes d'intégration continue de l'API](#les-étapes-dintégration-continue-de-lapi)
+    - [1) Automatisation des tests unitaires](#1-automatisation-des-tests-unitaires)
+      - [1.1) Installation de Node.js](#11-installation-de-nodejs)
+      - [1.2) Installation des dépendances](#12-installation-des-dépendances)
+      - [1.3) Exécution des tests unitaires](#13-exécution-des-tests-unitaires)
+      - [1.4) Création du fichier de configuration de GitHub Actions](#14-création-du-fichier-de-configuration-de-github-actions)
+    - [2) Construction et partage de l'image Docker](#2-construction-et-partage-de-limage-docker)
+    - [3) Automatisation des tests d'intégration](#3-automatisation-des-tests-dintégration)
+  - [4) Mise en cache des dépendances](#4-mise-en-cache-des-dépendances)
 
 ---
 
@@ -43,7 +46,68 @@
 
 ### 1) Automatisation des tests unitaires
 
+#### 1.1) Installation de Node.js
+
+Il est nécessaire d'avoir NodeJS pour exécuter les tests unitaires en local.
+
+On peut le télécharger en utilisant nvm (Node Version Manager) :
+
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash
+```
+
+```bash
+wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash
+```
+
+Puis on installe la version lts de NodeJS :
+
+```bash
+nvm install --lts
+```
+
+Et enfin :
+
+```bash
+nvm use --lts
+```
+
+#### 1.2) Installation des dépendances
+
+L'application se trouve dans le dossier `api`.
+
+On se place dans ce dossier :
+
+```bash
+cd api
+```
+
+On installe les dépendances de l'application avec la commande :
+
+```bash
+yarn install
+```
+
+#### 1.3) Exécution des tests unitaires
+
+On exécute les tests unitaires avec la commande :
+
+```bash
+yarn test
+```
+
+#### 1.4) Création du fichier de configuration de GitHub Actions
+
+Dans le répertoire racine, création du dossier `.github/workflows` et du fichier `automate.yaml` à l'intérieur.
+
+```shell
+mkdir .github/workflows
+touch .github/workflows/automate.yaml
+```
+
 ```yaml
+# automate.yaml
+
 name: Automatisation de l'intégration continue
 on: [push]
 jobs:
@@ -80,9 +144,22 @@ jobs:
 - `yarn install` : Installation des dépendances.
 - `yarn test` : Exécution des tests unitaires.
 
-### 2) Automatisation des tests d'intégration
+### 2) Construction et partage de l'image Docker
+
+D'abord il faut créer un compte [DockerHub](https://hub.docker.com/).
+
+Ensuite il faut générer un [token d'accès](https://docs.docker.com/docker-hub/access-tokens/),
+
+Maintenant nous ajoutons les secrets suivants dans les paramètres du dépôt GitHub :
+
+`Settings > Secrets > New repository secret`
+
+- TP3_DOCKERHUB_SECRET : Token d'accès DockerHub.
+- TP3_DOCKERHUB_USERNAME : Nom d'utilisateur DockerHub.
 
 ```yaml
+# Suite du fichier automate.yaml
+
 push-to-docker:
   name: Push on Docker Hub
   runs-on: ubuntu-latest
@@ -116,15 +193,24 @@ push-to-docker:
         tags: yoanc/tp3-github-actions:${{ github.sha }}
 ```
 
-node_modules not found > Install dependencies
+- `push-to-docker` : Nom du job.
+- `docker/login-action@v2` : Action permettant de se connecter à DockerHub.
+- `docker/setup-buildx-action@v2` : Action permettant de configurer Docker Buildx.
+- `docker/build-push-action@v3` : Action permettant de construire et de partager une image Docker.
 
-Error buildx > Setup buildx
+On utilise `${{ secrets.TP3_DOCKERHUB_USERNAME }}` et `${{ secrets.TP3_DOCKERHUB_SECRET }}` pour récupérer les secrets.
 
-Error Dockerfile not found > Add context
+Il est nécessaire d'installer buildx avec `docker/setup-buildx-action@v2` pour pouvoir construire une image Docker multi-architecture.
+
+Il ne faut pas oublier d'ajouter le `context` dans la configuration de l'action `docker/build-push-action@v3` pour spécifier l'emplacemment du Dockerfile.
+
+Il suffit de rajouter `${{ github.sha }}` à la fin de l'image Docker pour que l'image soit unique.
 
 ### 3) Automatisation des tests d'intégration
 
 ```yaml
+# Suite du fichier automate.yaml
+
 build-and-test-e2e:
   name: Run integration tests
   runs-on: ubuntu-latest
@@ -135,7 +221,7 @@ build-and-test-e2e:
     mongo:
       image: mongo
       ports:
-        - 27017:27017
+        - '27017:27017'
       env:
         MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USERNAME}
         MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
@@ -154,13 +240,44 @@ build-and-test-e2e:
         MONGODB_URI: mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@localhost:27017
 ```
 
-Running jobs directly on runner machine > use localhost to access service container > Must maps ports to enable access to service container
+Les tests d'intégration nécessitent une base de données MongoDB, il faut ajouter un service MongoDB dans le job.
 
-Add `needs` to `push-to-docker` job > prevent pushing to DockerHub if tests fail
+Il faut créer un fichier `.env` pour stocker les variables d'environnement.
+
+```shell
+touch .env
+```
+
+Avec les variables suivantes :
+
+```shell
+MONGODB_USERNAME=username
+MONGODB_PASSWORD=password
+```
+
+Comme les jobs sont exécutés directement sur une `runner machine` il faut spécifier les ports à utiliser pour le [mapping](https://docs.docker.com/config/containers/container-networking/). L'hôte est alors `localhost` et le port de la machine est `27017`.
+
+Pour éviter de pousser une image Docker si les tests échouent, il faut ajouter une condition [needs](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idneeds) dans le fichier `automate.yaml` à l'étape `Push on Docker Hub`.
+
+```yaml
+# automate.yaml
+
+push-to-docker:
+    name: Push on Docker Hub
+    runs-on: ubuntu-latest
+    needs: [build-and-test, build-and-test-e2e]
+    (...)
+```
 
 ## 4) Mise en cache des dépendances
 
+Pour accélérer le processus d'intégration continue, il est possible d'utiliser le cache des dépendances.
+
+Il suffit d'ajouter les étapes suivantes dans le fichier `automate.yaml` lors de l'installation des dépendances.
+
 ```yaml
+# automate.yaml
+
 - name: Setup NodeJS
         uses: actions/setup-node@v3
         with:
@@ -171,12 +288,15 @@ Add `needs` to `push-to-docker` job > prevent pushing to DockerHub if tests fail
         run: yarn install --immutable
 ```
 
-yarn cache not found > cache-dependency-path > it check in root folder by default
+- `cache` : Type de cache à utiliser.
+- `cache-dependency-path` : Chemin du fichier de dépendances.
 
-Add --immutable
+Ce dernier est important car le dossier racine est utilisé par défaut et permet d'éviter l'erreur suivante :
 
-## Références
+```error
+yarn cache not found
+```
 
-- [Workflow syntax for GitHub Actions - GitHub Docs](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idneeds) > needs > wait for other jobs to finish
+On peut ajouter `--immutable` à la commande `yarn install` pour éviter que les dépendances ne soient modifiées dans le fichier `yarn.lock`.
 
 </div>
