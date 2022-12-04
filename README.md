@@ -37,10 +37,10 @@
 
 ### Les étapes d'intégration continue de l'API
 
-- Installation des dépendances : `yarn install`
-- Exécution des tests unitaires : `yarn test`
-- Exécution des tests d'intégration : `yarn test:e2e`
-- Build de l'application : `yarn build`
+- Installation des dépendances : `yarn install`
+- Exécution des tests unitaires : `yarn test`
+- Exécution des tests d'intégration : `yarn test:e2e`
+- Build de l'application : `yarn build`
 - Construction de l'image Docker.
 - Partage de l'image Docker sur le DockerHub.
 
@@ -126,23 +126,27 @@ jobs:
         run: yarn test
 ```
 
-- `name` : Nom du workflow.
-- `on` : Déclencheur du workflow.
-- `jobs` : Liste des jobs.
-- `build-and-test` : Nom du job.
-- `name` : Nom du job.
-- `runs-on` : Plateforme d'exécution du job.
-- `defaults` : Configuration par défaut du job.
-- `run` : Configuration par défaut des étapes du job.
-- `working-directory` : Répertoire de travail par défaut des étapes du job.
-- `steps` : Liste des étapes du job.
-- `uses` : Action à exécuter.
-- `actions/checkout@v3` : Action permettant de récupérer le code source.
-- `actions/setup-node@v3` : Action permettant d'installer Node.js.
-- `name` : Nom de l'étape.
-- `run` : Commande à exécuter.
-- `yarn install` : Installation des dépendances.
-- `yarn test` : Exécution des tests unitaires.
+- `name` : Nom du workflow.
+- `on` : Déclencheur du workflow.
+- `jobs` : Liste des jobs.
+- `build-and-test` : Nom général du job.
+- `name` : Nom plus explicite du job.
+- `runs-on` : Plateforme d'exécution du job.
+- `defaults` : Configuration par défaut du job.
+- `run` : Configuration par défaut des étapes du job.
+- `working-directory` : Répertoire de travail par défaut des étapes du job.
+- `steps` : Liste des étapes du job.
+- `uses` : Action à exécuter.
+- `actions/checkout@v3` : Action qui permet de mettre le repo du code dans un workplace ($GITHUB_WORKPLACE) pour permettre au workflow d'y acceder.
+- `actions/setup-node@v3` : Action permettant d'installer Node.js.
+- `name` : Nom de l'étape.
+- `run` : Commande à exécuter.
+- `yarn install` : Installation des dépendances.
+- `yarn test` : Exécution des tests unitaires.
+
+Il est important de mettre des tirets pour le nom des étapes pour suivre une logique de telle sorte que chaque étape a son fonctionnement et de bien séparer les étapes.
+
+Lorsque l'on push sur Github on remarque sur Github le nouveau workflow avec toutes les caractéristiques comme le nom du workflow le nom des jobs, des étapes du job et processus détaillés de chaque étape dans le fichier automate.yaml qu'on a préalablement rempli.
 
 ### 2) Construction et partage de l'image Docker
 
@@ -154,8 +158,8 @@ Maintenant nous ajoutons les secrets suivants dans les paramètres du dépôt Gi
 
 `Settings > Secrets > New repository secret`
 
-- TP3_DOCKERHUB_SECRET : Token d'accès DockerHub.
-- TP3_DOCKERHUB_USERNAME : Nom d'utilisateur DockerHub.
+- TP3_DOCKERHUB_SECRET : Token d'accès DockerHub.
+- TP3_DOCKERHUB_USERNAME : Nom d'utilisateur DockerHub.
 
 ```yaml
 # Suite du fichier automate.yaml
@@ -193,18 +197,22 @@ push-to-docker:
         tags: yoanc/tp3-github-actions:${{ github.sha }}
 ```
 
-- `push-to-docker` : Nom du job.
-- `docker/login-action@v2` : Action permettant de se connecter à DockerHub.
-- `docker/setup-buildx-action@v2` : Action permettant de configurer Docker Buildx.
-- `docker/build-push-action@v3` : Action permettant de construire et de partager une image Docker.
+- `push-to-docker` : Nom du job.
+- `docker/login-action@v2` : Action permettant de se connecter à DockerHub.
+- `docker/setup-buildx-action@v2` : Action permettant de configurer Docker Buildx.
+- `docker/build-push-action@v3` : Action permettant de construire et de partager une image Docker.
 
 On utilise `${{ secrets.TP3_DOCKERHUB_USERNAME }}` et `${{ secrets.TP3_DOCKERHUB_SECRET }}` pour récupérer les secrets.
 
 Il est nécessaire d'installer buildx avec `docker/setup-buildx-action@v2` pour pouvoir construire une image Docker multi-architecture.
 
-Il ne faut pas oublier d'ajouter le `context` dans la configuration de l'action `docker/build-push-action@v3` pour spécifier l'emplacemment du Dockerfile.
+Il ne faut pas oublier d'ajouter le `context` dans la configuration de l'action `docker/build-push-action@v3` pour spécifier l'emplacemment du Dockerfile. L'action `docker/build-push-action@v3` ne prend pas en compte le `working-directory` par défaut.
+
+Il faut créer un nouveau répertoire dans Dockerhub pour pouvoir utiliser `push:true` puisqu'il nécessite un répertoire dont on met le nom dans les tags
 
 Il suffit de rajouter `${{ github.sha }}` à la fin de l'image Docker pour que l'image soit unique.
+
+On remarque que dans le répertoire du dockerhub on a une nouvelle image avec un tag que l'on va reporter dans le docker-compose.yaml partie image de l'api.
 
 ### 3) Automatisation des tests d'intégration
 
@@ -279,17 +287,17 @@ Il suffit d'ajouter les étapes suivantes dans le fichier `automate.yaml` lors d
 # automate.yaml
 
 - name: Setup NodeJS
-        uses: actions/setup-node@v3
-        with:
-          cache: 'yarn'
-          cache-dependency-path: '**/yarn.lock'
+    uses: actions/setup-node@v3
+      with:
+        cache: 'yarn'
+        cache-dependency-path: '**/yarn.lock'
 
-      - name: Install dependencies
-        run: yarn install --immutable
+- name: Install dependencies
+    run: yarn install --immutable
 ```
 
-- `cache` : Type de cache à utiliser.
-- `cache-dependency-path` : Chemin du fichier de dépendances.
+- `cache` : Type de cache à utiliser.
+- `cache-dependency-path` : Chemin du fichier de dépendances.
 
 Ce dernier est important car le dossier racine est utilisé par défaut et permet d'éviter l'erreur suivante :
 
