@@ -27,7 +27,7 @@
       - [1.4) Création du fichier de configuration de GitHub Actions](#14-création-du-fichier-de-configuration-de-github-actions)
     - [2) Construction et partage de l'image Docker](#2-construction-et-partage-de-limage-docker)
     - [3) Automatisation des tests d'intégration](#3-automatisation-des-tests-dintégration)
-  - [4) Mise en cache des dépendances](#4-mise-en-cache-des-dépendances)
+    - [4) Mise en cache des dépendances](#4-mise-en-cache-des-dépendances)
 
 ---
 
@@ -152,7 +152,7 @@ Lorsque l'on push sur Github on remarque sur Github le nouveau workflow avec tou
 
 D'abord il faut créer un compte [DockerHub](https://hub.docker.com/).
 
-Ensuite il faut générer un [token d'accès](https://docs.docker.com/docker-hub/access-tokens/),
+Ensuite il faut générer un [token d'accès](https://docs.docker.com/docker-hub/access-tokens/).
 
 Maintenant nous ajoutons les secrets suivants dans les paramètres du dépôt GitHub :
 
@@ -277,7 +277,7 @@ push-to-docker:
     (...)
 ```
 
-## 4) Mise en cache des dépendances
+### 4) Mise en cache des dépendances
 
 Pour accélérer le processus d'intégration continue, il est possible d'utiliser le cache des dépendances.
 
